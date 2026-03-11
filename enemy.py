@@ -6,29 +6,30 @@ class Inimigo(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
 
-        self.state = "idle"
+        self.state = "walk"
         self.frame_atual = 0
         self.ultimo_update = pygame.time.get_ticks()
-        self.velocidade_animacao = 150
+        self.velocidade_animacao = 100
         self.velocidade = VELOCIDADE_INIMIGO
+        self.direcao = -1  # -1 para esquerda, 1 para direita
 
-        self.animacoes = {"idle": [], "death": []}
+        self.animacoes = {"walk": [], "death": []}
         self.carregar_animacoes()
 
-        if self.animacoes["idle"]:
-            self.image = self.animacoes["idle"][0]
+        if self.animacoes["walk"]:
+            self.image = self.animacoes["walk"][0]
             self.rect = self.image.get_rect()
             self.rect.x = x
             self.rect.y = y - self.rect.height
 
     def carregar_animacoes(self):
         try:
-            # CAMINHOS CORRIGIDOS
-            idle = pygame.image.load("assets/images/enemy_idle.png").convert_alpha()
+            # idle = pygame.image.load("assets/images/enemy_idle.png").convert_alpha()
+            walk = pygame.image.load("assets/images/enemy_walk.png").convert_alpha()
             death = pygame.image.load("assets/images/enemy_death.png").convert_alpha()
 
-            self.animacoes["idle"] = self.extrair_frames(idle, 4)
-            self.animacoes["death"] = self.extrair_frames(death, 4)
+            self.animacoes["walk"] = self.extrair_frames(walk)
+            self.animacoes["death"] = self.extrair_frames(death)
 
             print("✅ Inimigo carregado")
 
@@ -36,23 +37,23 @@ class Inimigo(pygame.sprite.Sprite):
             print(f"❌ Inimigo: {e}")
             surf = pygame.Surface((40, 60))
             surf.fill(VERMELHO)
-            self.animacoes["idle"] = [surf] * 4
-            self.animacoes["death"] = [surf] * 4
+            self.animacoes["walk"] = self.extrair_frames(walk)
+            self.animacoes["death"] = self.extrair_frames(death)
 
-    def extrair_frames(self, sheet, num_frames):
+    def extrair_frames(self, sheet, frame_width=128):
         frames = []
-        largura = sheet.get_width() // num_frames
+        num_frames = sheet.get_width() // frame_width
         altura = sheet.get_height()
 
         for i in range(num_frames):
-            frame = sheet.subsurface((i * largura, 0, largura, altura))
-            frame = pygame.transform.scale(frame, (largura, altura))
+            rect = pygame.Rect(i * frame_width, 0, frame_width, altura)
+            frame = sheet.subsurface(rect)
             frames.append(frame)
         return frames
 
     def update(self):
-        if self.state == "idle":
-            self.rect.x -= self.velocidade
+        if self.state == "walk":
+            self.rect.x += self.velocidade * self.direcao
 
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_update > self.velocidade_animacao:
@@ -67,6 +68,9 @@ class Inimigo(pygame.sprite.Sprite):
                 self.frame_atual = 0
 
             self.image = frames[self.frame_atual]
+
+            if self.direcao == -1:
+                self.image = pygame.transform.flip(self.image, True, False)
 
         return True
 
