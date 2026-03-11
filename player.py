@@ -34,9 +34,9 @@ class Jogador(pygame.sprite.Sprite):
             attack = pygame.image.load(f"assets/images/{prefixo}_attack.png").convert_alpha()
             death = pygame.image.load(f"assets/images/{prefixo}_death.png").convert_alpha()
 
-            self.animacoes["idle"] = self.extrair_frames(idle, 4)
-            self.animacoes["attack"] = self.extrair_frames(attack, 4)
-            self.animacoes["death"] = self.extrair_frames(death, 4)
+            self.animacoes["idle"] = self.extrair_frames(idle)
+            self.animacoes["attack"] = self.extrair_frames(attack)
+            self.animacoes["death"] = self.extrair_frames(death)
 
             print(f"✅ Player {self.numero} carregado")
 
@@ -46,20 +46,20 @@ class Jogador(pygame.sprite.Sprite):
             cor = VERDE if self.numero == 1 else AZUL
             surf = pygame.Surface((50, 80))
             surf.fill(cor)
-            self.animacoes["idle"] = [surf] * 4
-            self.animacoes["attack"] = [surf] * 4
-            self.animacoes["death"] = [surf] * 4
+            self.animacoes["idle"] = self.extrair_frames(idle)
+            self.animacoes["attack"] = self.extrair_frames(attack)
+            self.animacoes["death"] = self.extrair_frames(death)
 
-    def extrair_frames(self, sheet, num_frames):
-        frames = []
-        largura = sheet.get_width() // num_frames
-        altura = sheet.get_height()
+    def extrair_frames(self, sheet, frame_width=128):
+      frames = []
+      num_frames = sheet.get_width() // frame_width
+      altura = sheet.get_height()
 
-        for i in range(num_frames):
-            frame = sheet.subsurface((i * largura, 0, largura, altura))
-            frame = pygame.transform.scale(frame, (largura, altura))
-            frames.append(frame)
-        return frames
+      for i in range(num_frames):
+          rect = pygame.Rect(i * frame_width, 0, frame_width, altura)
+          frame = sheet.subsurface(rect)
+          frames.append(frame)
+      return frames
 
     def update(self):
         agora = pygame.time.get_ticks()
