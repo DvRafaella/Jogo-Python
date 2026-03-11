@@ -51,15 +51,15 @@ class Jogador(pygame.sprite.Sprite):
             self.animacoes["death"] = self.extrair_frames(death)
 
     def extrair_frames(self, sheet, frame_width=128):
-      frames = []
-      num_frames = sheet.get_width() // frame_width
-      altura = sheet.get_height()
+        frames = []
+        num_frames = sheet.get_width() // frame_width
+        altura = sheet.get_height()
 
-      for i in range(num_frames):
-          rect = pygame.Rect(i * frame_width, 0, frame_width, altura)
-          frame = sheet.subsurface(rect)
-          frames.append(frame)
-      return frames
+        for i in range(num_frames):
+            rect = pygame.Rect(i * frame_width, 0, frame_width, altura)
+            frame = sheet.subsurface(rect)
+            frames.append(frame)
+        return frames
 
     def update(self):
         agora = pygame.time.get_ticks()
