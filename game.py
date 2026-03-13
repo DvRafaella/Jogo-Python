@@ -1,5 +1,4 @@
 import pygame
-import random
 from settings import *
 from player import Jogador
 from enemy import Inimigo
@@ -31,6 +30,8 @@ class Jogo:
         ]
         self.botao_clicado = [False, False, False]
 
+        self.tocar_musica("assets/sounds/menu_music.wav")
+
     def carregar_fundos(self):
         try:
             self.fundo_menu = pygame.image.load("assets/images/menu_bg.png").convert()
@@ -59,11 +60,13 @@ class Jogo:
                 if event.key == pygame.K_ESCAPE:
                     if self.estado == "JOGO":
                         self.estado = "MENU"
+                        self.tocar_musica("assets/sounds/menu_music.wav")
                     else:
                         return False
 
                 if event.key == pygame.K_r and self.estado == "GAME_OVER":
                     self.estado = "MENU"
+                    self.tocar_musica("assets/sounds/menu_music.wav")
 
                 # Teclas de teste
                 if event.key == pygame.K_m and self.jogador:
@@ -92,7 +95,7 @@ class Jogo:
 
         # Controles
         fonte_peq = pygame.font.Font(None, 24)
-        y = 470
+        y = 465
         controles = [
             "CONTROLES:",
             "A/D ou ←/→: Mover",
@@ -128,6 +131,7 @@ class Jogo:
 
     def iniciar_jogo(self):
         self.estado = "JOGO"
+        self.tocar_musica("assets/sounds/game_music.ogg")
         self.todos_sprites.empty()
         self.inimigos.empty()
 
@@ -155,11 +159,17 @@ class Jogo:
             self.jogador.mover_direita()
         if teclas[pygame.K_SPACE]:
             self.jogador.atacar()
-            self.pontuacao += 1  # Aumenta pontuação ao atacar
+            for inimigo in self.inimigos:
+                inimigo.morrer()
+                self.pontuacao += 10
 
         for sprite in self.todos_sprites:
             if not sprite.update():
                 sprite.kill()
+
+        # Verifica colisão do jogador com inimigos (jogador morre)
+        if pygame.sprite.spritecollideany(self.jogador, self.inimigos):
+            self.jogador.morrer()
 
         self.tempo_spawn += 1
         if self.tempo_spawn >= self.tempo_entre_spawns:
@@ -218,3 +228,11 @@ class Jogo:
             self.desenhar_game_over()
 
         return True
+    
+    def tocar_musica(self, caminho):
+        try:
+            pygame.mixer.music.load(caminho)
+            pygame.mixer.music.set_volume(0.8) # Volume entre 0.0 e 1.0
+            pygame.mixer.music.play(-1) # -1 faz a música tocar em loop infinito
+        except pygame.error:
+            print(f"❌ Erro ao carregar música: {caminho}")
